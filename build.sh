@@ -3,7 +3,7 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $DIR
 
-g++ -shared -static-libstdc++ -m32 -fpic -Wno-attributes -std=c++11 \
+g++ -shared -static-libstdc++ -m32 -fpic -Wno-attributes -std=c++14 \
     -DLINUX \
     ./3rdparty/sampgdk/*.c ./3rdparty/sampgdk/*.cpp src/*.cpp \
     -L./3rdparty/node/lib \

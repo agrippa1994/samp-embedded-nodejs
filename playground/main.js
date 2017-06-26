@@ -42,6 +42,8 @@ app.get("/pos/:id", (req, res) => {
         const arg4 = new Buffer(4);
 
         result = process.binding("samp").invokeNative("GetPlayerPos", "dRRR", arg1, arg2, arg3, arg4);
+        console.log("Test " + process.binding("samp").invokeNative("CallRemoteFunction", "ssd", new Buffer("OnPlayerUpdate\0"), new Buffer("d\0"), arg1));
+        console.log("Test " + process.binding("samp").invokeNative("CallRemoteFunction", "ss", new Buffer("OnGameModeInit\0"), new Buffer("\0"), arg1));
     
         res.json({ result: result, x: arg2.readFloatLE(), y: arg3.readFloatLE(), z: arg4.readFloatLE() });
         res.end();

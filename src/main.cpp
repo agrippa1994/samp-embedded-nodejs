@@ -1,3 +1,6 @@
+#include "dispatcher.h"
+#include "node_helpers.h"
+
 #include <sampgdk.h>
 
 #include <node.h>
@@ -5,64 +8,17 @@
 #include <thread>
 #include <iostream>
 #include <queue>
-#include <functional>
-#include <future>
-#include <condition_variable>
+
 
 #include "string.h"
 
 #define UNUSED(x) (void)x;
-#define NATIVE_NAPI_MODULE(module, init) NAPI_MODULE_X(module, init, NULL, NM_F_BUILTIN)
 
-class Dispatcher {
-public:
-    explicit Dispatcher() = default;
-    ~Dispatcher() = default;
-
-    void operator()(std::function<void(void)> task) {
-        std::unique_lock<std::mutex> lock(m_mutex);
-        m_function = task;
-
-        while(m_function)
-            m_condition_variable.wait(lock);
-    }
-
-    void execTask() {
-        std::unique_lock<std::mutex> lock(m_mutex);
-        if(!m_function)
-            return;
-        
-        m_function();
-        m_function = nullptr;
-        m_condition_variable.notify_all();
-    }
-
-private:
-    std::mutex m_mutex;
-    std::function<void()> m_function;
-    std::condition_variable m_condition_variable;
-};
 
 Dispatcher dispatcher;
 
 namespace nsamp
 {
-    class NodeScope {
-    public:
-        explicit NodeScope(napi_env env) : m_env(env) {
-            napi_open_handle_scope(m_env, &m_scope);
-        }
-        ~NodeScope() {
-            napi_close_handle_scope(m_env, m_scope);
-        }
-
-        NodeScope(const NodeScope &) = delete;
-        NodeScope operator=(const NodeScope &) = delete;
-
-    private:
-        napi_env m_env;
-        napi_handle_scope m_scope;
-    };
 
     napi_value invokeNative(napi_env env, napi_callback_info info) {
         NodeScope scope(env);
@@ -156,9 +112,10 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports() {
 
 PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
     std::thread thr([]() {
-        char *x[] = { "/home/mani/node_embedding/samp_test_plugin/samp03/samp03svr", "main.js" };
-        node::Start(2, (char**)x);
+        const char *x[] = { "samp03svr", "../playground/main.js" };
+        node::Start(2, const_cast<char **>(x));
     });
+
     thr.detach();
     return sampgdk::Load(ppData);
 }

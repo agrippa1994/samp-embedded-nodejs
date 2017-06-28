@@ -50,12 +50,23 @@ module.exports.ref = class {
         return this.buffer.readInt32LE();
     }
 
+    static get format() {
+        return "R";
+    }
+}
+
+module.exports.stringref = class {
+    constructor(size=32) {
+        this.type = "stringref";
+        this.buffer = new Buffer(size);
+    }
+
     toString(start, end) {
         return this.buffer.toString("ascii", start, end);
     }
 
     static get format() {
-        return "R";
+        return "S";
     }
 }
 

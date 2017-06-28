@@ -1,19 +1,19 @@
 const express = require("express");
 const app = express();
 const samp = require("./samp.js");
+const process = require("process");
 
 app.get("/message/:id/:message", (req, res) => {
     try {
         result = samp.natives.sendClientMessage([new samp.type.int(parseInt(req.params.id)),
-                                                new samp.type.int(0xFFFFFF),
-                                                new samp.type.string(req.params.message)]);
+                                                 new samp.type.int(0xFFFFFF),
+                                                 new samp.type.string(req.params.message)]);
 
-
-        //samp.natives.setPlayerPos([new samp.type.int(5), new samp.type.float(100), new samp.type.float(100), new samp.type.float(100)]);
         res.json({ result: result});
     } catch(e) {
         res.status(500);
         res.json({ exception: e });
+        console.log(e);
     }
 });
 
@@ -28,21 +28,62 @@ app.get("/pos/:id", (req, res) => {
     } catch(e) {
         res.status(500);
         res.json({ exception: e });
+        console.log(e);
     }
 });
 
 app.get("/name/:id", (req, res) => {
     try {
-        var name = new samp.type.ref(24);
+        var name = new samp.type.stringref(24);
         var result = samp.natives.getPlayerName([new samp.type.int(parseInt(req.params.id)),
-                                             name,
-                                             new samp.type.int(24)]);
-
+                                                 name,
+                                                 new samp.type.int(0x55555555)]);
         res.json({ result: result, x: name.toString(0, result) });
     }
     catch(e) {
         res.status(500);
         res.json({ exception: e });
+        console.log(e);
+    }
+});
+
+app.get("/playerinfo", (req, res) => {
+    try {
+        var playerInfo = [];
+        for(var idx = 0; idx < samp.natives.getMaxPlayers(); ++idx) {
+            var playerid = new samp.type.int(idx);
+
+            if(!samp.natives.isPlayerConnected([playerid]))
+                continue;
+
+            var health = new samp.type.ref();
+            samp.natives.getPlayerHealth([playerid, health]);
+
+            var x = new samp.type.ref();
+            var y = new samp.type.ref();
+            var z = new samp.type.ref();
+            samp.natives.getPlayerPos([playerid, x, y, z]);
+
+            var name = new samp.type.stringref(24);
+            var nameLength = samp.natives.getPlayerName([playerid, name, new samp.type.int(24)]);
+
+            var ip = new samp.type.stringref(16);
+            var ipLength = samp.natives.getPlayerIp([playerid, ip, new samp.type.int(16)]);
+
+            playerInfo.push({ x: x.toFloat(),
+                y: y.toFloat(),
+                z: z.toFloat(),
+                name: name.toString(0, nameLength),
+                ip: ip.toString(0, ipLength),
+                health: health.toFloat()
+            });
+        }
+        res.json(playerInfo);
+    }
+    catch(e) {
+        res.status(500);
+        res.json({ exception: e });
+        console.log(e);
     }
 });
 

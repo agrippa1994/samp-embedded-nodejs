@@ -34,11 +34,11 @@ app.get("/pos/:id", (req, res) => {
 
 app.get("/name/:id", (req, res) => {
     try {
-        var name = new samp.type.stringref(100);
+        var name = new samp.type.stringref(24);
         var result = samp.natives.getPlayerName([new samp.type.int(parseInt(req.params.id)),
                                                  name,
-                                                 new samp.type.int(100)]);
-        res.json({ result: result, x: name.toString(0, result) });
+                                                 new samp.type.int(name.size)]);
+        res.json({ result: result, x: name.toString() });
     }
     catch(e) {
         res.status(500);
@@ -50,7 +50,7 @@ app.get("/name/:id", (req, res) => {
 app.get("/networkstats", (req, res) => {
     try {
         var stats = new samp.type.stringref(1024);
-        var result = samp.natives.getNetworkStats([stats, new samp.type.int(1024)]);
+        var result = samp.natives.getNetworkStats([stats, new samp.type.int(stats.size)]);
         res.json({ result: result, stats: stats.toString() });
     }
     catch(e) {
@@ -78,10 +78,10 @@ app.get("/playerinfo", (req, res) => {
             samp.natives.getPlayerPos([playerid, x, y, z]);
 
             var name = new samp.type.stringref(24);
-            var nameLength = samp.natives.getPlayerName([playerid, name, new samp.type.int(24)]);
+            var nameLength = samp.natives.getPlayerName([playerid, name, new samp.type.int(name.size)]);
 
             var ip = new samp.type.stringref(16);
-            var ipLength = samp.natives.getPlayerIp([playerid, ip, new samp.type.int(16)]);
+            var ipLength = samp.natives.getPlayerIp([playerid, ip, new samp.type.int(ip.size)]);
 
             playerInfo.push({ x: x.toFloat(),
                 y: y.toFloat(),

@@ -78,6 +78,10 @@ module.exports.stringref = class {
         this.buffer = new Buffer(size * 4 + 1);
     }
 
+    get size() {
+        return (this.buffer.length - 1) / 4
+    }
+
     toString() {
         return this.buffer.toString("ascii").split("\0").shift();
     }
@@ -87,7 +91,7 @@ module.exports.stringref = class {
     }
 
     get format() {
-        return `S[${(this.buffer.length - 1) / 4}]`;
+        return `S[${this.size}]`;
     }
 }
 

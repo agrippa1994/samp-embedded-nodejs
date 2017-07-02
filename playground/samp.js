@@ -41,6 +41,22 @@ function callNative(native) {
     return samp.invokeNative.apply(null, [native, newNativeFormat, nativeArguments.length].concat(nativeArguments));;
 }
 
+function callPublic(public, format) {
+    var additionalArgs = Array.prototype.slice.call(arguments, 2) || []
+    for(var i = 0; i < additionalArgs.length; i++)
+        additionalArgs[i] = additionalArgs[i].buffer;
+
+    var args = [
+        "CallRemoteFunction",
+        "ss" + format,
+        additionalArgs.length + 2,
+        (new types.string(public)).buffer,
+        (new types.string(format)).buffer,
+    ].concat(additionalArgs);
+
+    return samp.invokeNative.apply(null, args);
+}
+
 var natives = {};
 for(var nativeName in nativeToFormat) {
     // some tricky workaround in order to create a function for each native
@@ -53,5 +69,6 @@ for(var nativeName in nativeToFormat) {
 
 module.exports = {
     natives, natives,
+    public: callPublic,
     type: types
 }

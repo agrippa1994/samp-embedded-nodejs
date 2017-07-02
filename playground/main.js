@@ -100,4 +100,18 @@ app.get("/playerinfo", (req, res) => {
     }
 });
 
+app.get("/init", (req, res) => {
+    try {
+        const result1= samp.public("OnGameModeInit", "");
+        const result2= samp.public("OnPlayerConnect", "d", new samp.type.int(0));
+        const result3 = samp.public("OnPlayerDeath", "ddd", new samp.type.int(0), new samp.type.int(0), new samp.type.int(0));
+        res.json({ result1: result1, result2: result2, result3: result3 });
+    }
+    catch(e) {
+        res.status(500);
+        res.json({ exception: e });
+        console.log(e);
+    }
+});
+
 app.listen(8080);

@@ -10,7 +10,8 @@ const nativeToFormat = {
     "GetPlayerIp": "dSd",
     "IsPlayerConnected": "d",
     "GetPlayerHealth": "dR",
-    "GetMaxPlayers": ""
+    "GetMaxPlayers": "",
+    "GetNetworkStats": "Sd"
 };
 
 function callNative(native) {
@@ -32,11 +33,7 @@ function callNative(native) {
             if(!(argument instanceof type))
                 throw `Argument ${argument.type} at index ${argumentIdx} does not conform to type ${typeIdentifier}`;
 
-            if(argument instanceof types.stringref)
-                newNativeFormat = `${newNativeFormat}S[${argument.buffer.length}]`;
-            else
-                newNativeFormat = `${newNativeFormat}${typeIdentifier}`;
-
+            newNativeFormat = newNativeFormat.concat(argument.format);
             nativeArguments.push(argument.buffer);
         }
     }

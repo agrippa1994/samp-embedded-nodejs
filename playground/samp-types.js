@@ -2,7 +2,6 @@
 module.exports.int = class {
     constructor(value) {
         this.type = "int";
-        this.format = "i";
         this.buffer = new Buffer(4);
         this.buffer.writeInt32LE(value);
     }
@@ -10,11 +9,15 @@ module.exports.int = class {
     static get format() {
         return "d";
     }
+
+    get format() {
+        return "d";
+    }
 };
 
 module.exports.float = class {
     constructor(value) {
-        this.type = "f";
+        this.type = "float";
         this.buffer = new Buffer(4);
         this.buffer.writeFloatLE(value);
     }
@@ -22,16 +25,23 @@ module.exports.float = class {
     static get format() {
         return "f";
     }
+
+    get format() {
+        return "f";
+    }
 };
 
 module.exports.string = class {
     constructor(value) {
         this.type = "string";
-        this.format = "s";
         this.buffer = new Buffer(value + "\0");
     }
 
     static get format() {
+        return "s";
+    }
+
+    get format() {
         return "s";
     }
 };
@@ -53,20 +63,31 @@ module.exports.ref = class {
     static get format() {
         return "R";
     }
+
+    get format() {
+        return "R";
+    }
 }
 
 module.exports.stringref = class {
     constructor(size=32) {
         this.type = "stringref";
-        this.buffer = new Buffer(size);
+
+        // sampgdk pushes string references as an cell array internally.
+        // Thus we need to allocate 4 times more memory
+        this.buffer = new Buffer(size * 4 + 1);
     }
 
-    toString(start, end) {
-        return this.buffer.toString("ascii", start, end);
+    toString() {
+        return this.buffer.toString("ascii").split("\0").shift();
     }
 
     static get format() {
         return "S";
+    }
+
+    get format() {
+        return `S[${(this.buffer.length - 1) / 4}]`;
     }
 }
 

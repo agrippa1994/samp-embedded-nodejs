@@ -34,11 +34,24 @@ app.get("/pos/:id", (req, res) => {
 
 app.get("/name/:id", (req, res) => {
     try {
-        var name = new samp.type.stringref(24);
+        var name = new samp.type.stringref(100);
         var result = samp.natives.getPlayerName([new samp.type.int(parseInt(req.params.id)),
                                                  name,
-                                                 new samp.type.int(0x55555555)]);
+                                                 new samp.type.int(100)]);
         res.json({ result: result, x: name.toString(0, result) });
+    }
+    catch(e) {
+        res.status(500);
+        res.json({ exception: e });
+        console.log(e);
+    }
+});
+
+app.get("/networkstats", (req, res) => {
+    try {
+        var stats = new samp.type.stringref(1024);
+        var result = samp.natives.getNetworkStats([stats, new samp.type.int(1024)]);
+        res.json({ result: result, stats: stats.toString() });
     }
     catch(e) {
         res.status(500);
@@ -73,8 +86,8 @@ app.get("/playerinfo", (req, res) => {
             playerInfo.push({ x: x.toFloat(),
                 y: y.toFloat(),
                 z: z.toFloat(),
-                name: name.toString(0, nameLength),
-                ip: ip.toString(0, ipLength),
+                name: name.toString(),
+                ip: ip.toString(),
                 health: health.toFloat()
             });
         }
